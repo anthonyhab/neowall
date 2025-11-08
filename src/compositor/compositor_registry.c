@@ -400,6 +400,9 @@ struct compositor_backend *compositor_backend_init(struct neowall_state *state) 
     compositor_backend_wlr_layer_shell_init(state);
     compositor_backend_kde_plasma_init(state);
     compositor_backend_gnome_shell_init(state);
+#ifdef HAVE_X11
+    compositor_backend_x11_init(state);
+#endif
     compositor_backend_fallback_init(state);
     
     /* Select best backend */

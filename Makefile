@@ -149,6 +149,19 @@ ifeq ($(HAS_EGL_KHR_FENCE),yes)
 endif
 
 # ============================================================================
+# X11/XCB Detection (must be before source files)
+# ============================================================================
+
+# X11/XCB dependencies (for X11 backend)
+X11_DEPS = xcb xcb-randr xcb-shape xcb-xfixes x11 x11-xcb
+HAS_X11 := $(shell pkg-config --exists $(X11_DEPS) && echo yes)
+ifeq ($(HAS_X11),yes)
+    $(info X11/XCB support enabled)
+else
+    $(info X11/XCB support disabled (optional))
+endif
+
+# ============================================================================
 # Source Files - Conditional Based on Detected Versions
 # ============================================================================
 
@@ -167,6 +180,11 @@ COMPOSITOR_BACKEND_SOURCES = $(COMPOSITOR_BACKEND_DIR)/wlr_layer_shell.c \
                              $(COMPOSITOR_BACKEND_DIR)/kde_plasma.c \
                              $(COMPOSITOR_BACKEND_DIR)/gnome_shell.c \
                              $(COMPOSITOR_BACKEND_DIR)/fallback.c
+
+# X11 backend (conditional)
+ifeq ($(HAS_X11),yes)
+    COMPOSITOR_BACKEND_SOURCES += $(COMPOSITOR_BACKEND_DIR)/x11.c
+endif
 
 # EGL core (always compiled)
 EGL_CORE_SOURCES = $(EGL_DIR)/capability.c $(EGL_DIR)/egl_core.c
@@ -247,6 +265,13 @@ PROTO_SRCS = $(PROTO_DIR)/wlr-layer-shell-unstable-v1-client-protocol.c \
 DEPS = wayland-client wayland-egl
 CFLAGS += $(shell pkg-config --cflags $(DEPS))
 LDFLAGS += $(shell pkg-config --libs $(DEPS))
+
+# X11/XCB link flags (detection already done earlier)
+ifeq ($(HAS_X11),yes)
+    CFLAGS += $(shell pkg-config --cflags $(X11_DEPS))
+    LDFLAGS += $(shell pkg-config --libs $(X11_DEPS))
+    CFLAGS += -DHAVE_X11
+endif
 
 # Optional dependencies (image loading)
 OPTIONAL_DEPS = libpng libjpeg

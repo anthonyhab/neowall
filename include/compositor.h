@@ -480,6 +480,11 @@ struct compositor_backend *compositor_backend_kde_plasma_init(struct neowall_sta
 /* GNOME Shell backend (subsurface fallback) */
 struct compositor_backend *compositor_backend_gnome_shell_init(struct neowall_state *state);
 
+#ifdef HAVE_X11
+/* X11/XCB backend (X11 display servers) */
+struct compositor_backend *compositor_backend_x11_init(struct neowall_state *state);
+#endif
+
 /* Generic fallback backend (works everywhere, limited features) */
 struct compositor_backend *compositor_backend_fallback_init(struct neowall_state *state);
 
